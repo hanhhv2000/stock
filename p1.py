@@ -1,5 +1,4 @@
 import streamlit as st
-from bs4 import BeautifulSoup
 import csv
 import urllib.request
 import requests
@@ -46,13 +45,13 @@ ma = ['AAA', 'AAM', 'AAT', 'ABS', 'ABT', 'ACB', 'ACC', 'ACL', 'ADG', 'ADS', 'AGG
       'VNM', 'VNS', 'VOS', 'VPB', 'VPD', 'VPG', 'VPH', 'VPI', 'VPS', 'VRC', 'VRE', 'VSC', 'VSH',
       'VSI', 'VTB', 'VTO', 'YBM', 'YEG']
 
-exportList2 = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS',
+expList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS',
                            'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
 # df = pd.read_csv("ckhoan.csv",names=col_Names)
 # df.head()
 st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def get_ckhoan():
 #     outfile = open("ckhoan.csv", "w", newline='', encoding='utf-8')
 #     writer = csv.writer(outfile)
@@ -74,7 +73,7 @@ def get_ckhoan():
 
     col_Names = ["CK", "Tran", "San", "TC",
                  "Giamua3", "KLmua3", "Giamua2", "KLmua2", "Giamua1", "KLmua1",
-                 "Giakhop", "Khoiluongkhoplenh", "Thaydoi", "Phantramthaydoi",
+                 "Gia_Khop", "Khoiluongkhoplenh", "Thaydoi", "Phantramthaydoi",
                  "Giaban3", "KLban3", "Giaban2", "KLban2", "Giaban1", "KLban1"
                  "Caonhat", "Thapnhat", "TongKL",
                  "DTNNmua", "DTNNban", "DTNNdu"]
@@ -85,10 +84,11 @@ def get_ckhoan():
 #     outfile.close()
     df = pd.read_csv("ckhoan.csv", names=col_Names)
     df = df.drop(0)
+    df.reindex(columns=['CK', 'Tran', 'San'])
     return df
 # -=======================END OF GET_CKHOAN====================================================#
 # c = 0
-
+ 
 
 def get_table():
 #     outfile = open('table.csv', 'w', newline='', encoding='utf-8')
@@ -96,7 +96,7 @@ def get_table():
 #     list_of_rows = []
 
     col_names = ["ID", "CK", "ISIN", "FIGI", "TENDOANHNGHIEP",
-                 "KLDANGKY_NIEMYET", "KLLUUHANH", "NGAYNIEMYET"]
+                 "KLDANGKY_NIEMYET", "KL_LUUHANH", "NGAYNIEMYET"]
 #     writer.writerow(col_names)
 
 #     for i in range(1, 14):
@@ -117,6 +117,7 @@ def get_table():
 #     outfile.close()
     df1 = pd.read_csv("table.csv", names=col_names)
     df1 = df1.drop(0).drop(columns=['ID', 'ISIN', "FIGI"])
+    df1.reindex(columns=['CK'])
     return df1
 # -=======================END OF TABLE====================================================#
 
@@ -135,7 +136,7 @@ def get_khuyen_nghi(ma):
 #     vni = pd.read_csv("https://raw.githubusercontent.com/ThuPhuong2042/project/main/vni_table.csv").drop(
 #         ['a', 'b', 'c', 'd'], axis=1).apply(lambda x: x.str.replace(',', '.'))
     vni = vni.drop(0)
-    vni.head()
+#     vni.head()
     vni['VNI_Close'] = vni['VNI_Close'].astype(float)
 
     for i in range(1, len(vni['Date'])):
@@ -164,8 +165,7 @@ def get_khuyen_nghi(ma):
             stock_return = (Tic['Percent Change'] + 1).cumprod()[-1]
             returns_multiple = round((stock_return / vni_return), 2)
         returns_multiples.append(returns_multiple)
-    rs_df = pd.DataFrame(list(zip(ma, returns_multiples)),
-                         columns=['Ticker', 'Returns_multiple'])
+    rs_df = pd.DataFrame(list(zip(ma, returns_multiples)), columns=['Ticker', 'Returns_multiple'])
     rs_df['RS_Rating'] = rs_df.Returns_multiple.rank(pct=True) * 100
     rs_df = rs_df[rs_df.RS_Rating >= rs_df.RS_Rating.quantile(.70)]
     rs_df = rs_df.sort_values(by='RS_Rating', ascending=False)
@@ -173,8 +173,8 @@ def get_khuyen_nghi(ma):
     return rs_df, stock
     # -=======================END OF KHUYEN_NGHI====================================================#
 
-def get_condition(rs_df, stock):
-    exportList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
+def get_condition(exportList,rs_df, stock):
+#     exportList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
     rs_stocks = rs_df['Ticker']
     for st in rs_stocks:
         try:
@@ -230,9 +230,9 @@ def get_condition(rs_df, stock):
     exportList = exportList.sort_values(by='CHỈ SỐ RS', ascending=False)
     return exportList
 # -=======================END OF GET_CONDITION====================================================#
-def get_condition_2(rs_df, stock):
-    exportList2 = pd.DataFrame(
-        columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
+def get_condition_2(exportList2,rs_df, stock):
+#     exportList2 = pd.DataFrame(
+#         columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
     rs_stocks = rs_df['Ticker']
     for st in rs_stocks:
         try:
@@ -286,35 +286,34 @@ def get_condition_2(rs_df, stock):
     return exportList2
 # -=======================END OF GET_CONDITION_2====================================================#
 def get_vonhoa(hose):
-    hose['Giakhop'] = hose['Giakhop'].astype(float)
+    hose['Gia_Khop'] = hose['Gia_Khop'].astype(float)
     hose['Thaydoi'] = hose['Thaydoi'].astype(float)
-    hose['KLLUUHANH'] = hose['KLLUUHANH'].apply(
-        lambda x: float(x.replace('.', '').replace(',', '.')))
+    hose['KL_LUUHANH'] = hose['KL_LUUHANH'].apply( lambda x: float(x.replace('.', '').replace(',', '.')))
     # VONHOA column
-    hose['VONHOA'] = hose['Giakhop']*hose['KLLUUHANH']
+    hose['VONHOA'] = hose['Gia_Khop'] * hose['KL_LUUHANH']
     # Von hoa plot
-    vonhoa = hose[['CK', 'Giakhop', 'KLLUUHANH', 'Thaydoi', 'VONHOA']].copy()
+    vonhoa = hose[['CK', 'Gia_Khop', 'KL_LUUHANH', 'Thaydoi', 'VONHOA']].copy()
     vonhoa = vonhoa.dropna()
-    conditions = [(vonhoa['Thaydoi'] > 0), (vonhoa['Thaydoi'] < 0),
-                  (vonhoa['Thaydoi'] == 0)]
+    conditions = [(vonhoa['Thaydoi'] > 0), (vonhoa['Thaydoi'] < 0),(vonhoa['Thaydoi'] == 0)]
     values = ['Tăng giá', 'Giảm giá', 'Đứng giá']
     vonhoa['Biến động'] = np.select(conditions, values)
     area = vonhoa['VONHOA']
-    vonhoaplot = px.scatter(vonhoa, x='Giakhop', y='KLLUUHANH',
+    vonhoaplot = px.scatter(vonhoa, x='Gia_Khop', y='KL_LUUHANH',
                             size=area, color='Biến động',
-                            color_discrete_map={
-                                'Tăng giá': 'green', 'Giảm giá': 'red', 'Đứng giá': 'yellow'},
+                            color_discrete_map={'Tăng giá': 'green', 'Giảm giá': 'red', 'Đứng giá': 'yellow'},
                             hover_name='CK')
-    vonhoaplot.update_layout(title='Vốn hoá', legend=dict(
-        orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+    
+    vonhoaplot.update_layout(title='Vốn hoá', legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+    vonhoaplot.update_layout(font_family="Courier New",font_color="blue", title_font_family="Times New Roman",
+                             title_font_color="red",
+                             legend_title_font_color="green")
     return vonhoaplot
  # -=======================END OF GET_VONHOA====================================================#
 
 
 def get_dandat(hose):
     hshort = hose[['CK', 'VONHOA', "Thaydoi"]].copy()
-    hshort['weights'] = hshort['VONHOA'].apply(
-        lambda x: x/hshort['VONHOA'].sum())
+    hshort['weights'] = hshort['VONHOA'].apply(lambda x: x/hshort['VONHOA'].sum())
     hshort['DIEMANHHUONG'] = hshort["Thaydoi"]*hshort['weights']
     mask = hshort['DIEMANHHUONG'] < 0
     hshort['DIEMANHHUONGDUONG'] = hshort['DIEMANHHUONG'].mask(mask)
@@ -331,25 +330,26 @@ def get_dandat(hose):
                                              name='Điểm ảnh hưởng dương', marker={'color': 'green'}, width=0.8))
     dandatplot = dandatplot.add_trace(go.Bar(x=dandat.index, y=dandat['DIEMANHHUONGAM'],
                                              name='Điểm ảnh hưởng âm', marker={'color': 'red'}, width=0.8))
-    dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,width=500, height=500,legend=dict(
+    dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,legend=dict(
         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
     return dandatplot
 # -=======================END OF GET_DANDAT====================================================#
 
 
-def display(st, vonhoaplot, dandatplot,exportList2,exportList):
+def display(st,vonhoaplot,dandatplot,exportList2,exportList):
 #     st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
-    st.title('Khuyến nghị giao dịch cổ phiếu')
+    st.markdown('<p style="font: 24px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;font-weight: bold;"> Khuyến nghị giao dịch cổ phiếu</p>', unsafe_allow_html=True)
     st.markdown('<p style="font-size:25px">Tổng quan thị trường</p>', unsafe_allow_html=True)
     col1, col2 = st.beta_columns(2)
     with col1:
         st.plotly_chart(vonhoaplot)
         st.markdown('<p style="font: 16px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;">Danh sách cổ phiếu có xu hướng tăng</p>',unsafe_allow_html=True)
-        st.dataframe(exportList2.assign(hack='').set_index('hack'))
+#         st.dataframe(exportList2.style.apply(lambda x: "background-color: red"))
+        st.table(exportList2.assign(hack='').set_index('hack'))
     with col2:
         st.plotly_chart(dandatplot)
         st.markdown('<p style="font: 16px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;">Danh sách cổ phiếu khuyến nghị mua hôm nay</p>',unsafe_allow_html=True)
-        st.dataframe(exportList.assign(hack='').set_index('hack'))
+        st.table(exportList.assign(hack='').set_index('hack'))
 
 
 # -=======================END OF DISPLAY====================================================#
@@ -368,10 +368,13 @@ dandatplot = get_dandat(hose)
 t = get_khuyen_nghi(ma)
 rs_df = t[0]
 stock = t[1]
-
-exportList = get_condition(rs_df, stock)
-exportList2 = get_condition_2(rs_df, stock)
-
+# start = time.time()
+exportList = get_condition(expList,rs_df, stock)
+# end = time.time()
+# print(end - start)
+exportList2 = get_condition_2(expList,rs_df, stock)
+# start = time.time()
 display(st, vonhoaplot, dandatplot,exportList2,exportList)
+
 
 
