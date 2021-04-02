@@ -123,6 +123,7 @@ def get_table():
 
 def get_khuyen_nghi(ma):
     stock = pd.read_csv('stock_file.csv')
+    stock.reindex(columns=['Date','Ticker'])  
 # stock = pd.read_csv('https://raw.githubusercontent.com/ThuPhuong2042/project/main/stock_file.csv')
     for i in range(1, len(stock['Date'])):
         stock_loop = stock['Date'][i]
@@ -136,6 +137,7 @@ def get_khuyen_nghi(ma):
 #     vni = pd.read_csv("https://raw.githubusercontent.com/ThuPhuong2042/project/main/vni_table.csv").drop(
 #         ['a', 'b', 'c', 'd'], axis=1).apply(lambda x: x.str.replace(',', '.'))
     vni = vni.drop(0)
+    vni.reindex(columns=['Date','VNI_Close'])  
 #     vni.head()
     vni['VNI_Close'] = vni['VNI_Close'].astype(float)
 
