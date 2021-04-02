@@ -285,7 +285,7 @@ def get_dandat(hose):
                                              name='Điểm ảnh hưởng âm', marker={'color': 'red'}, width=0.8))
 #     dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,legend=dict(
 #         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-    dandatplot.update_layout( title='Nhóm dẫn dắt thị trường', xaxis_tickfont_size=14, yaxis=dict( title='Điểm ảnh hưởng', titlefont_size=16,tickfont_size=14,),
+    dandatplot.update_layout( title='Nhóm dẫn dắt thị trường', xaxis_tickfont_size=12, yaxis=dict( title='Điểm ảnh hưởng', titlefont_size=12,tickfont_size=12,title_font_color="red",legend_title_font_color="green"),
     legend=dict(x=0, y=1.0, bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)'
     ), barmode='group', bargap=0.15, # gap between bars of adjacent location coordinates.
     bargroupgap=0.1 # gap between bars of the same location coordinate.
