@@ -53,68 +53,20 @@ st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_i
 
 @st.cache(allow_output_mutation=True)
 def get_ckhoan():
-#     outfile = open("ckhoan.csv", "w", newline='', encoding='utf-8')
-#     writer = csv.writer(outfile)
-
-#     webUrl = urllib.request.urlopen(
-#         'https://raw.githubusercontent.com/ThuPhuong2042/project/main/27_3_2021.html')
-#     source_code = webUrl.read()
-
-#     soup = BeautifulSoup(source_code)
-#     #table_tag = soup.find_all('table',{'class' : 'price table-scroll-table'})
-#     table = soup.find('table', {'class': 'price table-scroll-table'})
-#     list_of_rows = []
-#     for row in table.find_all('tr'):
-#         list_of_cells = []
-#         for cell in row.find_all(["th", "td"]):
-#             text = cell.text
-#             list_of_cells.append(text)
-#         list_of_rows.append(list_of_cells)
-
     col_Names = ["CK", "Tran", "San", "TC",
                  "Giamua3", "KLmua3", "Giamua2", "KLmua2", "Giamua1", "KLmua1",
                  "Gia_Khop", "Khoiluongkhoplenh", "Thaydoi", "Phantramthaydoi",
                  "Giaban3", "KLban3", "Giaban2", "KLban2", "Giaban1", "KLban1"
                  "Caonhat", "Thapnhat", "TongKL",
                  "DTNNmua", "DTNNban", "DTNNdu"]
-#     writer.writerow(col_Names)
-#     for item in list_of_rows:
-#         writer.writerow(item)
-#         # print(' '.join(item))
-#     outfile.close()
     df = pd.read_csv("ckhoan.csv", names=col_Names)
     df = df.drop(0)
     df.reindex(columns=['CK', 'Tran', 'San'])
     return df
 # -=======================END OF GET_CKHOAN====================================================#
-# c = 0
- 
-
 def get_table():
-#     outfile = open('table.csv', 'w', newline='', encoding='utf-8')
-#     writer = csv.writer(outfile)
-#     list_of_rows = []
-
     col_names = ["ID", "CK", "ISIN", "FIGI", "TENDOANHNGHIEP",
                  "KLDANGKY_NIEMYET", "KL_LUUHANH", "NGAYNIEMYET"]
-#     writer.writerow(col_names)
-
-#     for i in range(1, 14):
-#         url = 'https://www.hsx.vn/Modules/Listed/Web/SymbolList?pageFieldName1=Code&pageFieldValue1=&pageFieldOperator1=eq&pageFieldName2=Sectors&pageFieldValue2=&pageFieldOperator2=&pageFieldName3=Sector&pageFieldValue3=00000000-0000-0000-0000-000000000000&pageFieldOperator3=&pageFieldName4=StartWith&pageFieldValue4=&pageFieldOperator4=&pageCriteriaLength=4&_search=false&nd=' + str(
-#             time.time()) + '&rows=30&page=' + str(i) + '&sidx=id&sord=desc'
-#         r = requests.get(url)
-#         json_data = json.loads(r.text)
-#         list_of_Allcells = []
-
-#         for j in range(0, json_data['records']):
-#             list_of_cells = []
-#             text = json_data['rows'][j]['cell']
-#             for cell in text:
-#                 list_of_cells.append(cell)
-#             list_of_Allcells.append(list_of_cells)
-#         for item in list_of_Allcells:
-#             writer.writerow(item)
-#     outfile.close()
     df1 = pd.read_csv("table.csv", names=col_names)
     df1 = df1.drop(0).drop(columns=['ID', 'ISIN', "FIGI"])
     df1.reindex(columns=['CK'])
@@ -334,6 +286,9 @@ def get_dandat(hose):
                                              name='Điểm ảnh hưởng âm', marker={'color': 'red'}, width=0.8))
     dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,legend=dict(
         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+    vonhoaplot.update_layout(font_family="Courier New",font_color="blue", title_font_family="Times New Roman",
+                             title_font_color="red",
+                             legend_title_font_color="green")  
     return dandatplot
 # -=======================END OF GET_DANDAT====================================================#
 
