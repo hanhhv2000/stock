@@ -283,10 +283,10 @@ def get_dandat(hose):
                                              name='Điểm ảnh hưởng dương', marker={'color': 'green'}, width=0.8))
     dandatplot = dandatplot.add_trace(go.Bar(x=dandat.index, y=dandat['DIEMANHHUONGAM'],
                                              name='Điểm ảnh hưởng âm', marker={'color': 'red'}, width=0.8))
-#     dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,legend=dict(
-#         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-    dandatplot.update_layout( title='Nhóm dẫn dắt thị trường',autosize=False, xaxis_tickfont_size=12, yaxis=dict( title='Điểm ảnh hưởng', titlefont_size=12,tickfont_size=12,),
-    legend=dict(x=1, y=1.02, bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)'))  
+    dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,legend=dict(
+        orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+#     dandatplot.update_layout( title='Nhóm dẫn dắt thị trường',autosize=False, xaxis_tickfont_size=12, yaxis=dict( title='Điểm ảnh hưởng', titlefont_size=12,tickfont_size=12,),
+#     legend=dict(x=1, y=1.02, bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)'))  
 #     vonhoaplot.update_layout(font_family="Courier New",font_color="blue", title_font_family="Times New Roman",
 #                              title_font_color="red",
 #                              legend_title_font_color="green")  
