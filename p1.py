@@ -64,6 +64,7 @@ def get_ckhoan():
     df.reindex(columns=['CK', 'Tran', 'San'])
     return df
 # -=======================END OF GET_CKHOAN====================================================#
+@st.cache(allow_output_mutation=True)
 def get_table():
     col_names = ["ID", "CK", "ISIN", "FIGI", "TENDOANHNGHIEP",
                  "KLDANGKY_NIEMYET", "KL_LUUHANH", "NGAYNIEMYET"]
@@ -72,7 +73,7 @@ def get_table():
     df1.reindex(columns=['CK'])
     return df1
 # -=======================END OF TABLE====================================================#
-
+@st.cache(allow_output_mutation=True)
 def get_khuyen_nghi(ma):
     stock = pd.read_csv('stock_file.csv')
     stock.reindex(columns=['Date','Ticker'])  
@@ -126,7 +127,7 @@ def get_khuyen_nghi(ma):
 
     return rs_df, stock
     # -=======================END OF KHUYEN_NGHI====================================================#
-
+@st.cache(allow_output_mutation=True)
 def get_condition(exportList,rs_df, stock):
 #     exportList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
     rs_stocks = rs_df['Ticker']
@@ -184,6 +185,7 @@ def get_condition(exportList,rs_df, stock):
     exportList = exportList.sort_values(by='CHỈ SỐ RS', ascending=False)
     return exportList
 # -=======================END OF GET_CONDITION====================================================#
+@st.cache(allow_output_mutation=True)
 def get_condition_2(exportList2,rs_df, stock):
 #     exportList2 = pd.DataFrame(
 #         columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
@@ -239,6 +241,7 @@ def get_condition_2(exportList2,rs_df, stock):
     exportList2 = exportList2.sort_values(by='CHỈ SỐ RS', ascending=False)
     return exportList2
 # -=======================END OF GET_CONDITION_2====================================================#
+@st.cache(allow_output_mutation=True)
 def get_vonhoa(hose):
     hose['Gia_Khop'] = hose['Gia_Khop'].astype(float)
     hose['Thaydoi'] = hose['Thaydoi'].astype(float)
@@ -264,7 +267,7 @@ def get_vonhoa(hose):
     return vonhoaplot
  # -=======================END OF GET_VONHOA====================================================#
 
-
+@st.cache(allow_output_mutation=True)
 def get_dandat(hose):
     hshort = hose[['CK', 'VONHOA', "Thaydoi"]].copy()
     hshort['weights'] = hshort['VONHOA'].apply(lambda x: x/hshort['VONHOA'].sum())
@@ -294,7 +297,7 @@ def get_dandat(hose):
     return dandatplot
 # -=======================END OF GET_DANDAT====================================================#
 
-
+@st.cache(allow_output_mutation=True)
 def display(st,vonhoaplot,dandatplot,exportList2,exportList):
 #     st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
     st.markdown('<p style="font: 24px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;font-weight: bold;"> Khuyến nghị giao dịch cổ phiếu</p>', unsafe_allow_html=True)
