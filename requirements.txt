@@ -1,9 +1,9 @@
-streamlit==0.74.1
+streamlit==0.76.0
 pandas 
-numpy==1.18.5
+numpy==1.19.5
 plotly==4.14.3
-beautifulsoup4==4.9.1
-urllib3==1.25.9
+beautifulsoup4==4.9.3
+urllib3==1.26.2
 requests
 json5==0.9.5
 python-graphql-client==0.4.2
