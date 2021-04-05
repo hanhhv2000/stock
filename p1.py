@@ -50,7 +50,7 @@ expList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ 
 # df = pd.read_csv("ckhoan.csv",names=col_Names)
 # df.head()
 st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
-@st.cache(allow_output_mutation=True)
+
 def get_ckhoan():
     col_Names = ["CK", "Tran", "San", "TC",
                  "Giamua3", "KLmua3", "Giamua2", "KLmua2", "Giamua1", "KLmua1",
@@ -72,7 +72,7 @@ def get_table():
     df1.reindex(columns=['CK'])
     return df1
 # -=======================END OF TABLE====================================================#
-# @st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 def get_khuyen_nghi(ma):
     stock = pd.read_csv('stock_file.csv')
     stock.reindex(columns=['Date','Ticker'])  
