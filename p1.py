@@ -49,7 +49,7 @@ expList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ 
                            'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
 # df = pd.read_csv("ckhoan.csv",names=col_Names)
 # df.head()
-st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=":Smiley:",layout="wide",initial_sidebar_state='auto')
+st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=":sunglasses:",layout="wide",initial_sidebar_state='auto')
 
 def get_ckhoan():
     col_Names = ["CK", "Tran", "San", "TC",
