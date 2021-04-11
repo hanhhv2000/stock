@@ -50,7 +50,7 @@ expList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ 
 # df = pd.read_csv("ckhoan.csv",names=col_Names)
 # df.head()
 st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=":shark:",layout="wide",initial_sidebar_state='collapsed')
-@st.cache
+# @st.cache
 def get_ckhoan():
     col_Names = ["CK", "Tran", "San", "TC",
                  "Giamua3", "KLmua3", "Giamua2", "KLmua2", "Giamua1", "KLmua1",
@@ -64,7 +64,7 @@ def get_ckhoan():
     return df
 # -=======================END OF GET_CKHOAN====================================================#
 # @st.cache(allow_output_mutation=True)
-@st.cache
+# @st.cache
 def get_table():
     col_names = ["ID", "CK", "ISIN", "FIGI", "TENDOANHNGHIEP",
                  "KLDANGKY_NIEMYET", "KL_LUUHANH", "NGAYNIEMYET"]
