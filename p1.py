@@ -296,7 +296,7 @@ def get_dandat(hose):
     return dandatplot
 # -=======================END OF GET_DANDAT====================================================#
 
-@st.cache()
+# @st.cache()
 def display(st,vonhoaplot,dandatplot,exportList2,exportList):
 #     st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
     st.markdown('<p style="font: 24px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;font-weight: bold;"> Khuyến nghị giao dịch cổ phiếu</p>', unsafe_allow_html=True)
