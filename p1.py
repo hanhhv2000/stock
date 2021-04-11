@@ -72,7 +72,7 @@ def get_table():
     df1.reindex(columns=['CK'])
     return df1
 # -=======================END OF TABLE====================================================#
-@st.cache(allow_output_mutation=True)
+# @st.cache(allow_output_mutation=True)
 def get_khuyen_nghi(ma):
     stock = pd.read_csv('stock_file.csv')
     stock.reindex(columns=['Date','Ticker'])  
