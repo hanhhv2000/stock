@@ -45,8 +45,7 @@ ma = ['AAA', 'AAM', 'AAT', 'ABS', 'ABT', 'ACB', 'ACC', 'ACL', 'ADG', 'ADS', 'AGG
       'VNM', 'VNS', 'VOS', 'VPB', 'VPD', 'VPG', 'VPH', 'VPI', 'VPS', 'VRC', 'VRE', 'VSC', 'VSH',
       'VSI', 'VTB', 'VTO', 'YBM', 'YEG']
 
-expList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS',
-                           'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
+expList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
 # df = pd.read_csv("ckhoan.csv",names=col_Names)
 # df.head()
 st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=":shark:",layout="wide",initial_sidebar_state='collapsed')
@@ -71,11 +70,68 @@ def get_table():
     df1.reindex(columns=['CK'])
     return df1
 # -=======================END OF TABLE====================================================#
+
+def get_stockfile():
+    # stock = pd.read_csv('stock_file.csv')
+    dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
+    stock = pd.read_csv('stock_file.csv',parse_dates=['Date'], date_parser=dateparse)
+    stock.reindex(columns=['Date','Ticker'])  
+
+    # for i in range(1, len(stock['Date'])):
+    #     stock_loop = stock['Date'][i]
+    #     stock_Date = datetime.datetime.strptime(stock_loop, '%Y-%m-%d')
+    #     stock['Date'][i] = stock_Date.date()
+    # stock['Date'] = pd.to_datetime(stock.Date)
+    stock = stock.sort_values(by='Date', ascending=True)
+    stock = stock.set_index('Date')
+    return stock
+
+def get_vnitable():
+    vni = pd.read_csv("vni_table.csv").drop(['a', 'b', 'c', 'd'], axis=1).apply(lambda x: x.str.replace(',', '.'))
+    vni = vni.drop(0)
+    vni.reindex(columns=['Date','VNI_Close'])  
+    vni['VNI_Close'] = vni['VNI_Close'].astype(float)
+
+    # for i in range(1, len(vni['Date'])):
+    #     loop = vni['Date'][i]
+    #     vni_Date = datetime.datetime.strptime(loop, '%d/%m/%Y')
+    #     vni['Date'][i] = vni_Date.date()
+
+    vni['Date'] = pd.to_datetime(vni['Date'])
+    # vni['Date'] = pd.to_datetime(vni.Date)
+    vni = vni.sort_values(by='Date', ascending=True)
+    vni = vni.set_index('Date')
+    vni['Percent Change'] = vni['VNI_Close'].pct_change()
+    vni_return = (vni['Percent Change'] + 1).cumprod()[-1]
+    return  vni_return
+
+def get_khuyennghi(stock,vni_return):
+    returns_multiples = []
+    m = 0
+    tic_stock = []
+
+    for i in range(0, len(ma)):
+        Tic = stock[stock["Ticker"] == ma[i]]
+        m = len(Tic)
+        tic_stock.append(Tic)
+        #     print(m)
+        Tic['Percent Change'] = Tic['Adj.Close'].pct_change()
+        if m != 0:
+            stock_return = (Tic['Percent Change'] + 1).cumprod()[-1]
+            returns_multiple = round((stock_return / vni_return), 2)
+        returns_multiples.append(returns_multiple)
+    rs_df = pd.DataFrame(list(zip(ma, returns_multiples)), columns=['Ticker', 'Returns_multiple'])
+    rs_df['RS_Rating'] = rs_df.Returns_multiple.rank(pct=True) * 100
+    rs_df = rs_df[rs_df.RS_Rating >= rs_df.RS_Rating.quantile(.70)]
+    rs_df = rs_df.sort_values(by='RS_Rating', ascending=False)
+    # rs_df = rs_df.set_index('RS_Rating')
+    return  rs_df
+
+
 # @st.cache(allow_output_mutation=True)
 def get_khuyen_nghi(ma):
     stock = pd.read_csv('stock_file.csv')
     stock.reindex(columns=['Date','Ticker'])  
-# stock = pd.read_csv('https://raw.githubusercontent.com/ThuPhuong2042/project/main/stock_file.csv')
     for i in range(1, len(stock['Date'])):
         stock_loop = stock['Date'][i]
         stock_Date = datetime.datetime.strptime(stock_loop, '%Y-%m-%d')
@@ -83,13 +139,9 @@ def get_khuyen_nghi(ma):
     stock['Date'] = pd.to_datetime(stock.Date)
     stock = stock.sort_values(by='Date', ascending=True)
     stock = stock.set_index('Date')
-    vni = pd.read_csv("vni_table.csv").drop(
-        ['a', 'b', 'c', 'd'], axis=1).apply(lambda x: x.str.replace(',', '.'))
-#     vni = pd.read_csv("https://raw.githubusercontent.com/ThuPhuong2042/project/main/vni_table.csv").drop(
-#         ['a', 'b', 'c', 'd'], axis=1).apply(lambda x: x.str.replace(',', '.'))
+    vni = pd.read_csv("vni_table.csv").drop(['a', 'b', 'c', 'd'], axis=1).apply(lambda x: x.str.replace(',', '.'))
     vni = vni.drop(0)
     vni.reindex(columns=['Date','VNI_Close'])  
-#     vni.head()
     vni['VNI_Close'] = vni['VNI_Close'].astype(float)
 
     for i in range(1, len(vni['Date'])):
@@ -102,7 +154,6 @@ def get_khuyen_nghi(ma):
     vni = vni.set_index('Date')
 
     vni['Percent Change'] = vni['VNI_Close'].pct_change()
-
     vni_return = (vni['Percent Change'] + 1).cumprod()[-1]
     returns_multiples = []
     m = 0
@@ -126,8 +177,8 @@ def get_khuyen_nghi(ma):
     return rs_df, stock
     # -=======================END OF KHUYEN_NGHI====================================================#
 # @st.cache(allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True)
 def get_condition(exportList,rs_df, stock):
-#     exportList = pd.DataFrame(columns=['MÃ CỔ PHIẾU', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
     rs_stocks = rs_df['Ticker']
     for st in rs_stocks:
         try:
@@ -146,8 +197,7 @@ def get_condition(exportList,rs_df, stock):
             moving_average_200 = df["SMA_200"][-1]
             low_of_52week = round(min(df["Low"][-260:]), 2)
             high_of_52week = round(max(df["High"][-260:]), 2)
-            RS_Rating = round(
-                rs_df[rs_df['Ticker'] == st].RS_Rating.tolist()[0])
+            RS_Rating = round(rs_df[rs_df['Ticker'] == st].RS_Rating.tolist()[0])
             try:
                 moving_average_200_20 = df["SMA_200"][-20]
             except Exception:
@@ -172,23 +222,20 @@ def get_condition(exportList,rs_df, stock):
             condition_9 = Volume > (1.5 * Pre_volume) and currentClose >  (1.01 * Pre_Close)
             # If all conditions above are true, add stock to exportList
             if (condition_1 and condition_2 and condition_3 and condition_4 and condition_5 and condition_6 and condition_7 and condition_8 and condition_9):
-                exportList = exportList.append(
-                    {'MÃ CỔ PHIẾU': st, 'GIÁ ĐÓNG CỬA': currentClose,'CHỈ SỐ RS': RS_Rating, 'SMA50': moving_average_50, 'SMA150': moving_average_150,
-                        'SMA200': moving_average_200, 'ĐÁY 52 TUẦN': low_of_52week, 'ĐỈNH 52 TUẦN': high_of_52week},
-                    ignore_index=True)
+                exportList = exportList.append({'MÃ CỔ PHIẾU': st, 'GIÁ ĐÓNG CỬA': currentClose,'CHỈ SỐ RS': RS_Rating, 'SMA50': moving_average_50, 'SMA150': moving_average_150,
+                        'SMA200': moving_average_200, 'ĐÁY 52 TUẦN': low_of_52week, 'ĐỈNH 52 TUẦN': high_of_52week}, ignore_index=True)
         except Exception as e:
             print(e)
             print(f"Could not gather data on {st}")
     # currentClose
     exportList = exportList.sort_values(by='CHỈ SỐ RS', ascending=False)
-#     exportList = exportList.loc[{7}]
+    
     return exportList
 
 # -=======================END OF GET_CONDITION====================================================#
 # @st.cache(allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True)
 def get_condition_2(exportList2,rs_df, stock):
-#     exportList2 = pd.DataFrame(
-#         columns=['MÃ CỔ PHIẾU', 'GIÁ ĐÓNG CỬA', 'CHỈ SỐ RS', 'SMA50', 'SMA150', 'SMA200', 'ĐÁY 52 TUẦN', 'ĐỈNH 52 TUẦN'])
     rs_stocks = rs_df['Ticker']
     for st in rs_stocks:
         try:
@@ -239,9 +286,11 @@ def get_condition_2(exportList2,rs_df, stock):
             print(f"Could not gather data on {st}")
     # currentClose
     exportList2 = exportList2.sort_values(by='CHỈ SỐ RS', ascending=False)
+    # time.sleep(2)
     return exportList2
 # -=======================END OF GET_CONDITION_2====================================================#
 # @st.cache(allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True)
 def get_vonhoa(hose):
     hose['GIÁ KHỚP'] = hose['GIÁ KHỚP'].astype(float)
     hose['Thaydoi'] = hose['Thaydoi'].astype(float)
@@ -268,7 +317,9 @@ def get_vonhoa(hose):
  # -=======================END OF GET_VONHOA====================================================#
 
 # @st.cache(allow_output_mutation=True)
+# @st.cache(suppress_st_warning=True)
 def get_dandat(hose):
+    
     hshort = hose[['CK', 'VỐN HÓA THỊ TRƯỜNG', "Thaydoi"]].copy()
     hshort['weights'] = hshort['VỐN HÓA THỊ TRƯỜNG'].apply(lambda x: x/hshort['VỐN HÓA THỊ TRƯỜNG'].sum())
     hshort['DIEMANHHUONG'] = hshort["Thaydoi"]*hshort['weights']
@@ -289,77 +340,48 @@ def get_dandat(hose):
     dandatplot.update_layout(title_text='Nhóm dẫn dắt thị trường', autosize=False,legend=dict(
         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
     dandatplot.update_layout(barmode='group', xaxis_tickangle=-45)  
-#     dandatplot.update_layout( title='Nhóm dẫn dắt thị trường',autosize=False, xaxis_tickfont_size=12, yaxis=dict( title='Điểm ảnh hưởng', titlefont_size=12,tickfont_size=12,),
-#     legend=dict(x=1, y=1.02, bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)'))  
     dandatplot.update_layout(font_family="Courier New",font_color="blue", title_font_family="Times New Roman",
                              title_font_color="red",
                              legend_title_font_color="green")  
     return dandatplot
 # -=======================END OF GET_DANDAT====================================================#
-
 # @st.cache(allow_output_mutation=True)
+@st.cache(suppress_st_warning=True)
 def display(st,vonhoaplot,dandatplot,exportList2,exportList):
-#     st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
+    # st.set_page_config(page_title='Khuyến nghị giao dịch cổ phiếu', page_icon=None,layout="wide",initial_sidebar_state='auto')
     st.markdown('<p style="font: 24px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;font-weight: bold;"> Khuyến nghị giao dịch cổ phiếu</p>', unsafe_allow_html=True)
     st.markdown('<p style="font-size:25px">Tổng quan thị trường</p>', unsafe_allow_html=True)
     col1, col2 = st.beta_columns(2)
     with col1:
         st.plotly_chart(vonhoaplot)
         st.markdown('<p style="font: 16px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;">Danh sách cổ phiếu có xu hướng tăng</p>',unsafe_allow_html=True)
-#         st.dataframe(exportList2.style.apply(lambda x: "background-color: red"))
         st.table(exportList2.assign(hack='').set_index('hack'))
     with col2:
         st.plotly_chart(dandatplot)
         st.markdown('<p style="font: 16px bold Georgia, serif; text-transform: uppercase; color: blue;text-align: center;">Danh sách cổ phiếu khuyến nghị mua hôm nay</p>',unsafe_allow_html=True)
         st.table(exportList.assign(hack='').set_index('hack'))
 
-
 # -=======================END OF DISPLAY====================================================#
 #                                                                                           #
 #======================START PROGRAM========================================================#
-# df = get_ckhoan()
-# df1 = get_table()
-# hose = df1.merge(df)
 
-# # Convert
-# vonhoaplot = get_vonhoa(hose)
-# # Dan dat thi truong
-# dandatplot = get_dandat(hose)
-# # print(dandatplot)
-
-# t = get_khuyen_nghi(ma)
-# rs_df = t[0]
-# stock = t[1]
-# # start = time.time()
-# exportList = get_condition(expList,rs_df, stock)
-# # end = time.time()
-# # print(end - start)
-# exportList2 = get_condition_2(expList,rs_df, stock)
-# # start = time.time()
-# display(st, vonhoaplot, dandatplot,exportList2,exportList)
 def main():
-    df = get_ckhoan()
-    df1 = get_table()
-    hose = df1.merge(df)
-
-    # Convert
+    df_ckhoan = get_ckhoan()
+    df_table = get_table()
+    hose = df_table.merge(df_ckhoan)
+    # sort theo cột
+    hose.sort_values(by=['CK', 'TENDOANHNGHIEP'])
+    hose.reindex(columns=['CK'])
     vonhoaplot = get_vonhoa(hose)
-    # Dan dat thi truong
+     # Dan dat thi truong
     dandatplot = get_dandat(hose)
-    # print(dandatplot)
-
-    t = get_khuyen_nghi(ma)
-    rs_df = t[0]
-    stock = t[1]
+    stock = get_stockfile()
+    vni_return = get_vnitable()
+    rs_df = get_khuyennghi(stock,vni_return)
     # start = time.time()
     exportList = get_condition(expList,rs_df, stock)
-    # end = time.time()
     # print(end - start)
     exportList2 = get_condition_2(expList,rs_df, stock)
-
-# print(exportList)
-# print(exportList2)
-# start = time.time()
     display(st, vonhoaplot, dandatplot,exportList2,exportList)
 # ========================================MAIN==============================================#
 
