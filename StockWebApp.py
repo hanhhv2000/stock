@@ -229,7 +229,7 @@ def get_condition(exportList,rs_df, stock):
             print(f"Could not gather data on {st}")
     # currentClose
     exportList = exportList.sort_values(by='CHỈ SỐ RS', ascending=False)
-    exportList = exportList.loc[{18,4,12,6}]
+   
     return exportList
 
 # -=======================END OF GET_CONDITION====================================================#
@@ -381,7 +381,7 @@ def main():
     # start = time.time()
     exportList = get_condition(expList,rs_df, stock)
     st.write('exportList 1 :' , exportList)
-    exportList = exportList.loc[{4,6,13,19}]
+    exportList = exportList.loc[{18,4,12,6}]
     # print(end - start)
     exportList2 = get_condition_2(expList,rs_df, stock)
     display(st, vonhoaplot, dandatplot,exportList2,exportList)
