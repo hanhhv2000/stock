@@ -381,7 +381,7 @@ def main():
     rs_df = get_khuyennghi(stock,vni_return)
     # start = time.time()
     exportList = get_condition(expList,rs_df, stock)
-    st.write('exportList 1 :' , exportList)
+#     st.write('exportList 1 :' , exportList)
     exportList = exportList.loc[{18,4,12,6}]
     # print(end - start)
     exportList2 = get_condition_2(expList,rs_df, stock)
