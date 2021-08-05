@@ -82,7 +82,8 @@ def get_stockfile():
     #     stock_Date = datetime.datetime.strptime(stock_loop, '%Y-%m-%d')
     #     stock['Date'][i] = stock_Date.date()
     # stock['Date'] = pd.to_datetime(stock.Date)
-    stock = stock.sort_values(by='Date', ascending=True)
+#     stock = stock.sort_values(by='Date', ascending=True)
+    stock = stock.sort_values(by=['Ticker', 'Date'], ascending=True)  
     stock = stock.set_index('Date')
     return stock
 
@@ -108,12 +109,12 @@ def get_vnitable():
 def get_khuyennghi(stock,vni_return):
     returns_multiples = []
     m = 0
-    tic_stock = []
+#     tic_stock = []
 
     for i in range(0, len(ma)):
         Tic = stock[stock["Ticker"] == ma[i]]
         m = len(Tic)
-        tic_stock.append(Tic)
+#         tic_stock.append(Tic)
         #     print(m)
         Tic['Percent Change'] = Tic['Adj.Close'].pct_change()
         if m != 0:
